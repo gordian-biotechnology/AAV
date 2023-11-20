@@ -44,7 +44,7 @@ for (i in 1:dim(annot)[1]) {
 x.all.summary <- read_tsv(paste0(input.prefix, '.summary.csv')) %>% mutate(map_start=map_start0,map_end=map_end1) %>% mutate(SampleID=input.prefix,.before=read_id)
 write_tsv(x.all.summary,str_c(c(input.prefix,".alignments.tsv"), collapse = ""))
 
-x.all.err <- read_tsv(paste0(input.prefix, '.nonmatch_stat.csv.gz')) %>% mutate(SampleID=input.prefix,.before=read_id)
+x.all.err <- read_tsv(paste0(input.prefix, '.nonmatch_stat.csv')) %>% mutate(SampleID=input.prefix,.before=read_id)
 x.all.read <- read_tsv(paste0(input.prefix, '.per_read.csv')) %>% mutate(SampleID=input.prefix,.before=read_id)
 
 x.all.err[x.all.err$type=='D',"type"] <- 'deletion'
