@@ -116,19 +116,19 @@ p1.map_iden <- ggplot(x.summary.vector, aes(map_iden*100, fill=map_subtype)) + g
                xlab("Mapping Identity (%)") + ylab("Read Count") +
                labs(title="Distribution of Mapped Identity to Reference")
 
-p1.map_len <- ggplot(x.summary.vector, aes(map_len, fill=map_subtype)) + geom_histogram(aes(y=..count../sum(..count..))) +
+p1.map_len <- ggplot(x.summary.vector, aes(map_len, fill=map_subtype)) + geom_histogram(aes(y=after_stat(count/sum(count)))) +
                xlab("Mapped Reference Length") + ylab("Fraction of Reads") +
                labs(title="Distribution of Mapped Reference Spanning Region Size")
 
 p1.map_starts <- ggplot(x.summary.vector, aes(map_start0+1, fill=map_subtype)) +
-                geom_histogram(aes(y=..count../sum(..count..))) +
+                geom_histogram(aes(y=after_stat(count/sum(count)))) +
                 geom_vline(xintercept=TARGET_REGION_START, color='red', lty=2) +
                 geom_vline(xintercept=TARGET_REGION_END, color='red', lty=2) +
                 xlab("Mapped Reference Start Position") + ylab("Fraction of Reads") +
                 labs(title="Distribution of Mapped Reference Start Position")
 
 p1.map_ends <- ggplot(x.summary.vector, aes(map_end1, fill=map_subtype)) +
-                geom_histogram(aes(y=..count../sum(..count..))) +
+                geom_histogram(aes(y=after_stat(count/sum(count)))) +
                 geom_vline(xintercept=TARGET_REGION_START, color='red', lty=2) +
                 geom_vline(xintercept=TARGET_REGION_END, color='red', lty=2) +
                 xlab("Mapped Reference End Position") + ylab("Fraction of Reads") +
@@ -159,18 +159,18 @@ x.read.repcap <- filter(x.all.read, assigned_type=='repcap')
 x.summary.repcap <- filter(x.all.summary, read_id %in% x.read.repcap$read_id)
 
 if (dim(x.read.repcap)[1] > 10) { # only plot if at least 10 reads
-    p1.map_len.repcap <- ggplot(x.summary.repcap, aes(map_len, fill=map_subtype)) + geom_histogram(aes(y=..count../sum(..count..))) +
+    p1.map_len.repcap <- ggplot(x.summary.repcap, aes(map_len, fill=map_subtype)) + geom_histogram(aes(y=after_stat(count/sum(count)))) +
                    xlab("Mapped Reference Length") + ylab("Fraction of Reads") +
                    labs(title="Repcap: Distribution of Mapped Reference Spanning Region Size")
 
     p1.map_starts.repcap <- ggplot(x.summary.repcap, aes(map_start0+1, fill=map_subtype)) +
-                    geom_histogram(aes(y=..count../sum(..count..))) +
+                    geom_histogram(aes(y=after_stat(count/sum(count)))) +
                     geom_vline(xintercept=TARGET_REGION_START_REPCAP, color='red', lty=2) +
                     xlab("Mapped Reference Start Position") + ylab("Fraction of Reads") +
                     labs(title="Repcap: Distribution of Mapped Reference Start Position")
 
     p1.map_ends.repcap <- ggplot(x.summary.repcap, aes(map_end1, fill=map_subtype)) +
-                    geom_histogram(aes(y=..count../sum(..count..))) +
+                    geom_histogram(aes(y=after_stat(count/sum(count)))) +
                     geom_vline(xintercept=TARGET_REGION_END_REPCAP, color='red', lty=2) +
                     xlab("Mapped Reference End Position") + ylab("Fraction of Reads") +
                     labs(title="Repcap: Distribution of Mapped Reference End Position")
