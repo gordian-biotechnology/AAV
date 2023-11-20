@@ -112,7 +112,7 @@ p1.err_ins <- ggplot(filter(df.err.vector,type=='insertion'), aes(x=pos0_div, y=
                    subtitle="Higher bars indicate hot spots for insertion w.r.t reference") +
                xlab("Reference Position") + ylab("Frequency")
 
-p1.map_iden <- ggplot(x.summary.vector, aes(map_iden*100, fill=map_subtype)) + geom_histogram(binwidth=0.01) +
+p1.map_iden <- ggplot(x.summary.vector, aes(map_iden*100, fill=map_subtype)) + geom_histogram(binwidth=0.1) +
                xlab("Mapping Identity (%)") + ylab("Read Count") +
                labs(title="Distribution of Mapped Identity to Reference")
 
