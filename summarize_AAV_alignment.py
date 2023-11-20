@@ -210,6 +210,43 @@ def assign_read_type(r, annotation):
     else:
         return _type, 'NA'
 
+def process_alignment_bam_dict(sorted_sam_filename, annotation, output_prefix, starting_readname=None, ending_readname=None):
+    """
+    :param sorted_sam_filename: Sorted (by read name) SAM filename
+    :param annotation:
+    :param output_prefix:
+    """
+    f1 = open(output_prefix+'.summary.csv', 'w')
+    f2 = open(output_prefix+'.nonmatch_stat.csv', 'w')
+    f3 = open(output_prefix+'.per_read.csv', 'w')
+
+    writer1 = DictWriter(f1, SUMMARY_FIELDS, delimiter='\t')
+    writer2 = DictWriter(f2, NONMATCH_FIELDS, delimiter='\t')
+    writer3 = DictWriter(f3, PER_READ_FIELDS, delimiter='\t')
+    writer1.writeheader()
+    writer2.writeheader()
+    writer3.writeheader()
+
+    debug_count = 0
+
+    reader = pysam.AlignmentFile(sorted_sam_filename, check_sq=False)
+    bam_writer = pysam.AlignmentFile(output_prefix+'.tagged.bam', 'wb', header=reader.header)
+
+    record_dict = {}
+
+    with pysam.AlignmentFile(sorted_sam_filename, "rb") as bam_file:
+        for i, read in enumerate(bam_file):
+            if read.qname in record_dict.keys():
+                record_dict[read.qname].append(read)
+            else:
+                record_dict[read.qname] = [read]
+    for qname, records in record_dict.items():
+        process_alignment_records_for_a_read(records, annotation, writer1, writer2, writer3, bam_writer)
+    bam_writer.close()
+    f1.close()
+    f2.close()
+    f3.close()
+    return f3.name, output_prefix+'.tagged.bam'
 
 def process_alignment_bam(sorted_sam_filename, annotation, output_prefix, starting_readname=None, ending_readname=None):
     """
@@ -331,7 +368,7 @@ def process_alignment_records_for_a_read(records, annotation, writer1, writer2, 
     :return:
     """
     read_tally = {'primary': None, 'supp': []}
-    for r in records:
+    for i, r in enumerate(records):
         # check ccs id format is <movie>/<zmw>/ccs[/rev or /fwd]
         if ccs_rex.fullmatch(r.qname) is None:
             print("WARNING: sequence ID does not follow format movie/zmw/ccs[/rev or /fwd]. Might undercount ssAAV!")
@@ -382,10 +419,9 @@ def process_alignment_records_for_a_read(records, annotation, writer1, writer2, 
     # summarize it per read, now that all relevant alignments have been processed
     prim = read_tally['primary']
     supps = read_tally['supp']
-
     if len(supps) == 0:
         supp = None
-    elif len(supps) >= 1: # there's multiple supp, find the companion matching supp
+    elif len(supps) >= 1 and len(prim)>=1: # there's multiple supp, find the companion matching supp
         supp, supp_orientation = find_companion_supp_to_primary(prim, supps)
         # supp could be None, in which case there is best matching supp!
         # in the case supp is None we wanna see if this is a weird read (ex: mapped twice to + strand)
@@ -584,7 +620,7 @@ if __name__ == "__main__":
 
     d = read_annotation_file(args.annotation_txt)
     if args.cpus == 1:
-        per_read_csv, full_out_bam = process_alignment_bam(args.sam_filename, d, args.output_prefix)
+        per_read_csv, full_out_bam = process_alignment_bam_dict(args.sam_filename, d, args.output_prefix)
     else:
         per_read_csv, full_out_bam = run_processing_parallel(args.sam_filename, d, args.output_prefix, num_chunks=args.cpus)
 
